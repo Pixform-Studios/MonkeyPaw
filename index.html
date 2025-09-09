@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MonkeyPaw - Interactive Web Game</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>MonkeyPaw</h1>
+            <p class="subtitle">An Interactive Gaming Experience</p>
+        </header>
+
+        <main class="game-area">
+            <div class="game-display" id="gameDisplay">
+                <div class="welcome-message">
+                    <h2>Welcome to MonkeyPaw</h2>
+                    <p>Your interactive adventure begins here...</p>
+                </div>
+            </div>
+
+            <div class="chatbot-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        <span class="message-content">Hello! Welcome to MonkeyPaw. How can I help you start your adventure?</span>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="chatInput" placeholder="Type your message..." autocomplete="off">
+                    <button id="sendButton">Send</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/game.js"></script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>
