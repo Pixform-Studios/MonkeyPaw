@@ -50,3 +50,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Website Builder embed files
+monkeypaw-embed.html
