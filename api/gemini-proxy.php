@@ -29,8 +29,8 @@ if (!isset($input['wish']) || empty(trim($input['wish']))) {
 // Your Gemini API key (server-side only)
 $apiKey = 'AIzaSyCrmXhV-pT3pkYbkZRrBQQvNBt-0sOQunk';
 
-// Gemini API endpoint - Updated to use Gemini 1.5 Flash
-$apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $apiKey;
+// Gemini API endpoint - Updated to use Gemini 2.5 Pro
+$apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=' . $apiKey;
 
 // Monkey's Paw game prompt
 $systemPrompt = "You are the Monkey's Paw, a malicious wish-granting spirit. You must grant wishes in the most twisted way possible, ensuring the user gets EXACTLY what they asked for but in a way that makes them deeply regret it. The catch must be so severe that it completely negates any benefit or makes the situation worse than before.
