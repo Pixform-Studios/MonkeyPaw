@@ -3,39 +3,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MonkeyPaw - Interactive Web Game</title>
+    <title>MonkeyPaw - The Wishing Game</title>
+    <meta name="description" content="Try to beat the legendary Monkey's Paw! Make three wishes and watch them backfire in the most twisted ways imaginable.">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="game-container">
-        <header>
-            <h1>MonkeyPaw</h1>
-            <p class="subtitle">An Interactive Gaming Experience</p>
-        </header>
-
-        <main class="game-area">
-            <div class="game-display" id="gameDisplay">
-                <div class="welcome-message">
-                    <h2>Welcome to MonkeyPaw</h2>
-                    <p>Your interactive adventure begins here...</p>
-                </div>
+        <!-- Header Section -->
+        <div class="header-section">
+            <h1 class="game-title">Try and Beat the Monkey's Paw</h1>
+            <div class="paw-display" id="pawDisplay">
+                <!-- SVG will be loaded here -->
             </div>
+            <div class="wishes-counter">
+                <span id="wishesRemaining">3</span> fingers remaining
+            </div>
+        </div>
 
-            <div class="chatbot-container">
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message bot-message">
-                        <span class="message-content">Hello! Welcome to MonkeyPaw. How can I help you start your adventure?</span>
+        <!-- Chat Messages Area -->
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message genie-message">
+                    <div class="message-content">
+                        You have found the legendary Monkey's Paw. It will grant you exactly three wishes. Make your first wish...
                     </div>
                 </div>
-                <div class="chat-input-container">
-                    <input type="text" id="chatInput" placeholder="Type your message..." autocomplete="off">
-                    <button id="sendButton">Send</button>
-                </div>
             </div>
-        </main>
+        </div>
+
+        <!-- Wish Input -->
+        <div class="wish-input-container" id="wishInputContainer">
+            <input type="text" id="wishInput" placeholder="Speak your desire..." autocomplete="off" maxlength="500">
+            <button id="makeWishButton">✨ Make Wish</button>
+        </div>
     </div>
 
-    <script src="js/game.js"></script>
-    <script src="js/chatbot.js"></script>
+    <script>
+        // Production MonkeyPaw Game - Uses PHP backend for API security
+        class MonkeyPawGame {
+            constructor() {
+                this.gameState = {
+                    wishesUsed: 0,
+                    maxWishes: 3,
+                    gameOver: false,
+                    wishes: []
+                };
+                
+                this.pawDisplay = document.getElementById('pawDisplay');
+                this.wishesRemaining = document.getElementById('wishesRemaining');
+                this.wishInput = document.getElementById('wishInput');
+                this.makeWishButton = document.getElementById('makeWishButton');
+                this.wishInputContainer = document.getElementById('wishInputContainer');
+                this.chatMessages = document.getElementById('chatMessages');
+                
+                this.init();
+            }
+
+            async init() {
+                console.log('MonkeyPaw game initialized (Production)');
+                await this.loadMonkeyPawSVG();
+                this.setupEventListeners();
+                this.updateWishCounter();
+            }
+
+            async loadMonkeyPawSVG() {
+                try {
+                    const response = await fetch('images/monkey-paw.svg');
+                    const svgContent = await response.text();
+                    this.pawDisplay.innerHTML = svgContent;
+                } catch (error) {
+                    this.pawDisplay.innerHTML = `<div style="font-size: 4rem; text-align: center;"><div id="paw-emoji">🖐️</div></div>`;
+                }
+            }
+
+            setupEventListeners() {
+                this.makeWishButton.addEventListener('click', () => this.handleWishSubmission());
+                this.wishInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !this.makeWishButton.disabled) {
+                        this.handleWishSubmission();
+                    }
+                });
+            }
+
+            async handleWishSubmission() {
+                const wishText = this.wishInput.value.trim();
+                if (!wishText) return;
+                if (this.gameState.wishesUsed >= this.gameState.maxWishes) return;
+
+                this.setWishInputState(true);
+                this.addMessage(wishText, 'user-wish');
+                this.wishInput.value = '';
+
+                const wishData = {
+                    text: wishText,
+                    wishNumber: this.gameState.wishesUsed + 1,
+                    timestamp: Date.now()
+                };
+
+                this.gameState.wishes.push(wishData);
+                
+                const typingId = this.showTypingIndicator();
+
+                try {
+                    const response = await this.callAPI(wishData);
+                    this.removeTypingIndicator(typingId);
+                    
+                    wishData.response = response;
+                    
+                    this.addMessage(response, 'genie-message');
+                    this.handleWishProcessed(wishData);
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.removeTypingIndicator(typingId);
+                    const fallbackResponse = this.getFallbackResponse(wishText);
+                    
+                    wishData.response = fallbackResponse;
+                    
+                    this.addMessage(fallbackResponse, 'genie-message');
+                    this.handleWishProcessed(wishData);
+                }
+            }
+
+            async callAPI(wishData) {
+                // Build conversation context from previous wishes
+                let conversationContext = '';
+                if (this.gameState.wishes.length > 1) {
+                    conversationContext = '\n\nPREVIOUS WISHES AND CONSEQUENCES:\n';
+                    for (let i = 0; i < this.gameState.wishes.length - 1; i++) {
+                        const prevWish = this.gameState.wishes[i];
+                        conversationContext += `Wish ${i + 1}: "${prevWish.text}" - ${prevWish.response || '[Response pending]'}\n`;
+                    }
+                    conversationContext += '\nUSE THESE PREVIOUS CONSEQUENCES TO MAKE THE CURRENT WISH EVEN WORSE. Build on the suffering.';
+                }
+
+                const response = await fetch('api/gemini-proxy.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        wish: wishData.text,
+                        wishNumber: wishData.wishNumber,
+                        context: conversationContext
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Unknown API error');
+                }
+
+                return data.response;
+            }
+
+            getFallbackResponse(wishText) {
+                const lowerWish = wishText.toLowerCase();
+                
+                if (lowerWish.includes('rich') || lowerWish.includes('money') || lowerWish.includes('wealth')) {
+                    return `Granted—you become incredibly wealthy, but every dollar you touch turns to ash after exactly 10 seconds. You can see your fortune, but never spend a penny.`;
+                }
+                
+                if (lowerWish.includes('car') || lowerWish.includes('vehicle')) {
+                    return `Done—you receive the exact car you wanted, but it only starts when you're crying tears of genuine despair, and stops the moment you feel even slightly happy.`;
+                }
+                
+                if (lowerWish.includes('fly') || lowerWish.includes('flight')) {
+                    return `Granted—you can now fly, but only when you're on fire. The flames never go out, and the higher you fly, the more agonizing the burns become.`;
+                }
+                
+                const responses = [
+                    `Granted—you get exactly what you asked for, but it's fused permanently to your flesh and slowly poisoning you from within.`,
+                    `Done—your wish comes true, but only when you're experiencing the worst pain imaginable, and stops the moment you feel relief.`,
+                    `Granted—you receive your wish, but everyone you've ever loved will suffer eternally because of your greed.`
+                ];
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+
+            handleWishProcessed(wishData) {
+                this.gameState.wishesUsed++;
+                this.closeFinger(this.gameState.wishesUsed);
+                this.updateWishCounter();
+
+                if (this.gameState.wishesUsed >= this.gameState.maxWishes) {
+                    setTimeout(() => this.endGame(), 2000);
+                } else {
+                    this.setWishInputState(false);
+                }
+            }
+
+            closeFinger(wishNumber) {
+                const fingerMapping = { 1: 'finger-1', 2: 'finger-2', 3: 'finger-3' };
+                const fingerElement = document.getElementById(fingerMapping[wishNumber]);
+                const closedFingerElement = document.getElementById(fingerMapping[wishNumber] + '-closed');
+
+                if (fingerElement && closedFingerElement) {
+                    fingerElement.classList.add('finger-closing');
+                    setTimeout(() => {
+                        fingerElement.style.display = 'none';
+                        closedFingerElement.style.display = 'block';
+                        closedFingerElement.classList.add('finger-closed');
+                    }, 400);
+                } else {
+                    const pawEmoji = document.getElementById('paw-emoji');
+                    if (pawEmoji) {
+                        const emojiStates = ['🖐️', '🤘', '✌️', '✊'];
+                        pawEmoji.textContent = emojiStates[wishNumber] || '✊';
+                    }
+                }
+            }
+
+            updateWishCounter() {
+                const remaining = this.gameState.maxWishes - this.gameState.wishesUsed;
+                
+                if (!this.wishesRemaining || !document.getElementById('wishesRemaining')) {
+                    this.wishesRemaining = document.getElementById('wishesRemaining');
+                }
+                
+                if (this.wishesRemaining) {
+                    this.wishesRemaining.textContent = remaining;
+                    if (remaining === 0) {
+                        this.wishesRemaining.parentElement.innerHTML = '<span style="color: #ff6b6b; font-weight: bold;">No fingers remaining</span>';
+                    }
+                }
+            }
+
+            setWishInputState(disabled) {
+                this.wishInput.disabled = disabled;
+                this.makeWishButton.disabled = disabled;
+                this.wishInput.placeholder = disabled ? 'Processing your wish...' : 'Speak your desire...';
+            }
+
+            addMessage(content, messageType) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${messageType}`;
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                messageContent.textContent = content;
+                messageDiv.appendChild(messageContent);
+                this.chatMessages.appendChild(messageDiv);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'message genie-message typing-indicator';
+                typingDiv.id = `typing-${Date.now()}`;
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                messageContent.innerHTML = `<em>Granting wish</em><span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>`;
+                typingDiv.appendChild(messageContent);
+                this.chatMessages.appendChild(messageDiv);
+                this.addTypingAnimationCSS();
+                return typingDiv.id;
+            }
+
+            removeTypingIndicator(typingId) {
+                const element = document.getElementById(typingId);
+                if (element) element.remove();
+            }
+
+            addTypingAnimationCSS() {
+                if (document.querySelector('#typing-animation-css')) return;
+                const style = document.createElement('style');
+                style.id = 'typing-animation-css';
+                style.textContent = `.typing-dots { display: inline-block; margin-left: 5px; }
+                .typing-dots span { display: inline-block; animation: typing 1.4s infinite; }
+                .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+                .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+                @keyframes typing { 0%, 60%, 100% { opacity: 0.3; } 30% { opacity: 1; transform: translateY(-10px); } }`;
+                document.head.appendChild(style);
+            }
+
+            endGame() {
+                this.gameState.gameOver = true;
+                
+                const titleElement = document.querySelector('.game-title');
+                if (titleElement) {
+                    titleElement.textContent = 'You Have Run Out of Fingers';
+                }
+                
+                const inputContainer = this.wishInputContainer;
+                inputContainer.innerHTML = `
+                    <button id="newPawButton" style="
+                        width: 100%;
+                        padding: 12px 18px;
+                        background: linear-gradient(135deg, rgba(139, 0, 0, 0.9) 0%, rgba(220, 20, 60, 0.8) 50%, rgba(139, 0, 0, 0.9) 100%);
+                        color: #ffb3b3;
+                        border: 2px solid rgba(220, 20, 60, 0.8);
+                        border-radius: 25px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        font-size: 16px;
+                        font-family: 'Cinzel', serif;
+                        transition: all 0.3s ease;
+                        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 4px 12px rgba(139, 0, 0, 0.6), inset 0 1px 3px rgba(255, 107, 107, 0.3);
+                    ">🐒 Get a New Paw</button>
+                `;
+                
+                const newPawButton = document.getElementById('newPawButton');
+                newPawButton.addEventListener('click', () => this.restartGame());
+            }
+
+            restartGame() {
+                this.gameState = { wishesUsed: 0, maxWishes: 3, gameOver: false, wishes: [] };
+                
+                const titleElement = document.querySelector('.game-title');
+                if (titleElement) {
+                    titleElement.textContent = 'Try and Beat the Monkey\'s Paw';
+                }
+                
+                this.wishInputContainer.innerHTML = `
+                    <input type="text" id="wishInput" placeholder="Speak your desire..." autocomplete="off" maxlength="500">
+                    <button id="makeWishButton">✨ Make Wish</button>
+                `;
+                
+                this.wishInput = document.getElementById('wishInput');
+                this.makeWishButton = document.getElementById('makeWishButton');
+                
+                this.makeWishButton.addEventListener('click', () => this.handleWishSubmission());
+                this.wishInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !this.makeWishButton.disabled) {
+                        this.handleWishSubmission();
+                    }
+                });
+                
+                this.chatMessages.innerHTML = `
+                    <div class="message genie-message">
+                        <div class="message-content">
+                            You have found another Monkey's Paw. It will grant you exactly three wishes. Make your first wish...
+                        </div>
+                    </div>
+                `;
+                
+                this.loadMonkeyPawSVG();
+                
+                const wishesCounterElement = document.querySelector('.wishes-counter');
+                if (wishesCounterElement) {
+                    wishesCounterElement.innerHTML = '<span id="wishesRemaining">3</span> fingers remaining';
+                    this.wishesRemaining = document.getElementById('wishesRemaining');
+                }
+                
+                this.updateWishCounter();
+                this.setWishInputState(false);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.monkeyPawGame = new MonkeyPawGame();
+        });
+    </script>
 </body>
 </html>

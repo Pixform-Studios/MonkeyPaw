@@ -1,39 +1,130 @@
-# MonkeyPaw
+# 🐒 MonkeyPaw - The Wishing Game
 
-A web-based interactive game featuring a chatbot experience.
+**Try to beat the legendary Monkey's Paw!** Make three wishes and watch them backfire in the most twisted ways imaginable.
 
-## Description
+![MonkeyPaw Game](https://img.shields.io/badge/Status-Complete-green) ![PHP](https://img.shields.io/badge/PHP-Backend-blue) ![AI Powered](https://img.shields.io/badge/AI-Gemini%20Powered-orange)
 
-MonkeyPaw is an interactive web game that combines storytelling with AI-powered chatbot functionality to create an engaging gaming experience.
+## 🎮 About The Game
 
-## Features
+MonkeyPaw is a dark comedy interactive web game based on the classic "Monkey's Paw" legend. Players make three wishes through a chat interface, and an AI-powered spirit grants each wish with malicious, ironic twists designed to make you regret ever finding the cursed paw.
 
-- Interactive web-based gameplay
-- AI chatbot integration
-- Modern web technologies
-- Responsive design
+### Game Features
+- **🤖 AI-Powered**: Uses Google's Gemini API for creative, contextual responses
+- **🎭 Dark Humor**: Every wish backfires in creative, devastating ways
+- **📱 Responsive Design**: Works on desktop, tablet, and mobile
+- **🎨 Atmospheric UI**: Dark fortune teller theme with mystical ambiance
+- **🔄 Contextual Wishes**: Later wishes build on previous consequences
+- **✋ Visual Feedback**: Animated monkey paw with closing fingers
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- HTML5
-- CSS3
-- JavaScript (ES6+)
-- [Additional technologies to be specified]
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript
+- **Backend**: PHP (for secure API key handling)
+- **AI**: Google Gemini API
+- **Styling**: Custom CSS with Google Fonts (Cinzel, Creepster)
+- **Graphics**: Custom SVG illustrations
 
-## Getting Started
+## 🚀 Quick Start
 
-1. Clone this repository
-2. Open `index.html` in your browser
-3. Start playing!
+### For Local Development
+```bash
+# Clone the repository
+git clone [your-repo-url]
+cd MonkeyPaw
 
-## Development
+# Open directly in browser (limited functionality)
+open index.html
 
-This project is under active development. More details coming soon.
+# OR run with PHP server for full functionality
+php -S localhost:8000
+# Visit http://localhost:8000
+```
 
-## License
+### For Production (Hostinger/cPanel)
+1. Upload all files to your web hosting public_html folder
+2. Ensure PHP is enabled on your hosting
+3. The game will work automatically with the included PHP backend
 
-[License to be specified]
+## 📁 Project Structure
+
+```
+MonkeyPaw/
+├── index.html              # Main game file (includes embedded JS)
+├── css/
+│   └── styles.css          # Dark fortune teller theme
+├── images/
+│   └── monkey-paw.svg      # Animated paw with finger states
+├── api/
+│   └── gemini-proxy.php    # Secure API proxy (hides Gemini key)
+├── README.md               # This file
+├── WARP.md                 # Development guide for Warp AI
+└── .gitignore              # Git ignore file
+```
+
+## 🎯 How It Works
+
+1. **Player makes a wish** through the chat interface
+2. **Frontend sends request** to PHP backend with wish text and context
+3. **PHP backend calls Gemini API** with carefully engineered prompts
+4. **AI generates twisted response** that grants the wish with a terrible catch
+5. **Finger closes** on the monkey paw, wishes counter decreases
+6. **Game over** after 3 wishes, with option to restart
+
+## 🔐 Security Features
+
+- **API Key Protection**: Gemini API key is stored server-side only
+- **Request Validation**: PHP backend validates all requests
+- **Error Handling**: Graceful fallback responses when AI is unavailable
+- **Rate Limiting**: Natural rate limiting through game mechanics
+
+## 🎨 Design Philosophy
+
+- **Dark Fortune Teller Aesthetic**: Inspired by mysterious, candlelit atmospheres
+- **Cyanide & Happiness Art Style**: Simple but expressive visual design
+- **No Scrolling Page**: Fixed viewport for immersive experience
+- **Responsive Layout**: Adapts beautifully to all screen sizes
+
+## 🧠 AI Prompt Engineering
+
+The game uses sophisticated prompt engineering to ensure:
+- **No player ever truly "wins"** - every wish has devastating consequences
+- **Contextual responses** - later wishes build on previous ones
+- **Creative interpretations** - literal twists, wordplay, and cruel irony
+- **Consistent character** - maintains the malicious monkey paw persona
+
+## 🌐 Deployment Guide
+
+### Hostinger Deployment
+1. **Access cPanel** from your Hostinger dashboard
+2. **Open File Manager** and navigate to `public_html`
+3. **Upload all project files** maintaining the directory structure
+4. **Set permissions** (usually automatic on Hostinger)
+5. **Test the game** by visiting your domain
+
+### Requirements
+- **PHP 7.4+** (for API backend)
+- **cURL enabled** (for Gemini API calls)
+- **Web server** (Apache/Nginx)
+
+## 🤝 Contributing
+
+Feel free to:
+- Report bugs or issues
+- Suggest new wish scenarios
+- Improve the AI prompts
+- Enhance the visual design
+- Add new features
+
+## 📜 License
+
+This project is open source. Feel free to use, modify, and distribute.
+
+## 🎭 Disclaimer
+
+*This is a work of dark comedy fiction. The game's responses are generated by AI for entertainment purposes. No actual curses, wishes, or monkey paws were harmed in the making of this game.*
 
 ---
 
-Developed by [Pixform Studios](https://github.com/Pixform-Studios)
+**Developed with ❤️ (and a touch of malice) for entertainment purposes**
+
+*"Be careful what you wish for... you just might get it."* 🐾

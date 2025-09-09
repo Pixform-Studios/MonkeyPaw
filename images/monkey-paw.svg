@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="250" height="350" viewBox="0 0 250 350" xmlns="http://www.w3.org/2000/svg">
+  
+  <!-- Background shadow for depth -->
+  <ellipse cx="125" cy="320" rx="60" ry="15" fill="#000" opacity="0.2" />
+  
+  <!-- Wrist/Arm -->
+  <g id="wrist">
+    <rect x="110" y="280" width="30" height="60" fill="#654321" stroke="#000" stroke-width="3" rx="15" />
+    <!-- Wrist band/cuff -->
+    <rect x="105" y="275" width="40" height="10" fill="#333" stroke="#000" stroke-width="2" rx="5" />
+    <circle cx="115" cy="280" r="2" fill="#666" />
+    <circle cx="135" cy="280" r="2" fill="#666" />
+  </g>
+  
+  <!-- Palm -->
+  <g id="palm">
+    <ellipse cx="125" cy="240" rx="35" ry="45" fill="#8B7355" stroke="#000" stroke-width="3" />
+    <!-- Palm lines -->
+    <path d="M100,220 Q125,230 150,220" stroke="#000" stroke-width="2" fill="none" opacity="0.6" />
+    <path d="M105,240 Q125,245 145,240" stroke="#000" stroke-width="2" fill="none" opacity="0.6" />
+  </g>
+
+  <!-- Open Fingers -->
+  <g id="fingers">
+    <!-- Pinky finger (finger-1) -->
+    <g id="finger-1" class="finger">
+      <ellipse cx="170" cy="180" rx="12" ry="35" fill="#8B7355" stroke="#000" stroke-width="3" transform="rotate(15, 170, 180)" />
+      <ellipse cx="168" cy="150" rx="8" ry="20" fill="#8B7355" stroke="#000" stroke-width="3" transform="rotate(20, 168, 150)" />
+      <!-- Knuckle -->
+      <circle cx="169" cy="165" r="3" fill="#654321" stroke="#000" stroke-width="1" />
+    </g>
+    
+    <!-- Ring finger (finger-2) -->
+    <g id="finger-2" class="finger">
+      <ellipse cx="145" cy="170" rx="12" ry="40" fill="#8B7355" stroke="#000" stroke-width="3" transform="rotate(5, 145, 170)" />
+      <ellipse cx="143" cy="135" rx="8" ry="25" fill="#8B7355" stroke="#000" stroke-width="3" transform="rotate(5, 143, 135)" />
+      <!-- Knuckle -->
+      <circle cx="144" cy="152" r="3" fill="#654321" stroke="#000" stroke-width="1" />
+    </g>
+    
+    <!-- Middle finger (finger-3) -->
+    <g id="finger-3" class="finger">
+      <ellipse cx="125" cy="165" rx="12" ry="45" fill="#8B7355" stroke="#000" stroke-width="3" />
+      <ellipse cx="125" cy="125" rx="8" ry="30" fill="#8B7355" stroke="#000" stroke-width="3" />
+      <!-- Knuckle -->
+      <circle cx="125" cy="145" r="3" fill="#654321" stroke="#000" stroke-width="1" />
+    </g>
+    
+    <!-- Thumb -->
+    <g id="thumb" class="finger">
+      <ellipse cx="85" cy="220" rx="15" ry="25" fill="#8B7355" stroke="#000" stroke-width="3" transform="rotate(-30, 85, 220)" />
+      <ellipse cx="75" cy="200" rx="10" ry="18" fill="#8B7355" stroke="#000" stroke-width="3" transform="rotate(-30, 75, 200)" />
+      <!-- Knuckle -->
+      <circle cx="80" cy="210" r="3" fill="#654321" stroke="#000" stroke-width="1" />
+    </g>
+  </g>
+  
+  <!-- Closed Finger States -->
+  <g id="finger-1-closed" class="finger-closed" style="display: none;">
+    <ellipse cx="155" cy="220" rx="10" ry="25" fill="#8B7355" stroke="#000" stroke-width="3" transform="rotate(45, 155, 220)" />
+    <circle cx="155" cy="215" r="3" fill="#654321" stroke="#000" stroke-width="1" />
+  </g>
+  
+  <g id="finger-2-closed" class="finger-closed" style="display: none;">
+    <ellipse cx="140" cy="210" rx="10" ry="28" fill="#8B7355" stroke="#000" stroke-width="3" transform="rotate(30, 140, 210)" />
+    <circle cx="140" cy="205" r="3" fill="#654321" stroke="#000" stroke-width="1" />
+  </g>
+  
+  <g id="finger-3-closed" class="finger-closed" style="display: none;">
+    <ellipse cx="125" cy="205" rx="10" ry="30" fill="#8B7355" stroke="#000" stroke-width="3" transform="rotate(15, 125, 205)" />
+    <circle cx="125" cy="200" r="3" fill="#654321" stroke="#000" stroke-width="1" />
+  </g>
+  
+  <g id="thumb-closed" class="finger-closed" style="display: none;">
+    <ellipse cx="105" cy="235" rx="12" ry="20" fill="#8B7355" stroke="#000" stroke-width="3" transform="rotate(10, 105, 235)" />
+    <circle cx="105" cy="230" r="3" fill="#654321" stroke="#000" stroke-width="1" />
+  </g>
+  
+  <!-- Mystical glow effect (optional) -->
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/> 
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Add subtle glow to the whole paw -->
+  <g filter="url(#glow)" opacity="0.3">
+    <ellipse cx="125" cy="240" rx="40" ry="50" fill="#667eea" />
+  </g>
+</svg>
