@@ -52,5 +52,5 @@ Thumbs.db
 *.temp
 
 # Website Builder embed files and setup tools
-# monkeypaw-embed.html (temporarily allowing for AI update)
+monkeypaw-embed.html
 setup-encryption.html
