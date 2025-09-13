@@ -13,12 +13,20 @@ body {
         radial-gradient(circle at 80% 80%, rgba(105, 105, 105, 0.3) 0%, transparent 50%),
         radial-gradient(circle at 40% 40%, rgba(0, 0, 0, 0.8) 0%, transparent 50%),
         linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
-    height: 100vh;
-    height: calc(var(--vh, 1vh) * 100); /* Mobile viewport fix */
+    min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100); /* Mobile viewport fix */
     color: #d4af37;
-    overflow: hidden;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-y: auto; /* Allow vertical scrolling */
     position: relative;
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Mobile viewport height fix */
+@supports (-webkit-touch-callout: none) {
+    body {
+        min-height: -webkit-fill-available;
+    }
 }
 
 /* Add some mystical atmosphere */
@@ -40,7 +48,7 @@ body::before {
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Creepster&display=swap');
 
 .game-container {
-    height: 100vh;
+    min-height: 100vh;
     display: grid;
     grid-template-rows: auto 1fr auto;
     grid-template-areas: 
@@ -50,6 +58,7 @@ body::before {
     padding: 20px;
     position: relative;
     z-index: 2;
+    gap: 10px; /* Add gap for better spacing */
 }
 
 /* Header with Title and Paw */
@@ -420,17 +429,32 @@ body::before {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    body {
+        padding-bottom: 20px; /* Extra bottom padding for mobile */
+    }
+    
     .game-container {
         padding: 15px;
+        min-height: calc(100vh - 40px); /* Account for padding */
+        gap: 15px;
     }
     
     .game-title {
         font-size: 2rem;
     }
     
+    .header-section {
+        padding: 15px 0;
+    }
+    
     .paw-display {
         width: 120px;
         height: 140px;
+    }
+    
+    .chat-container {
+        min-height: 200px; /* Ensure minimum height for chat */
+        max-height: 50vh; /* Prevent chat from taking too much space */
     }
     
     .chat-messages {
@@ -450,19 +474,40 @@ body::before {
         flex-direction: column;
         gap: 12px;
         padding: 15px;
+        margin-bottom: 20px; /* Extra bottom margin */
+        position: sticky;
+        bottom: 0;
+        background: 
+            linear-gradient(145deg, 
+                rgba(139, 69, 19, 0.4) 0%, 
+                rgba(101, 67, 33, 0.6) 50%, 
+                rgba(160, 82, 45, 0.4) 100%);
     }
     
     #makeWishButton, #newPawButton {
         width: 100%;
         padding: 14px 20px;
+        font-size: 16px;
+        min-height: 48px; /* Better touch target size */
     }
     
     #wishInput {
         padding: 14px 18px;
+        font-size: 16px; /* Prevent zoom on iOS */
+        min-height: 48px; /* Better touch target size */
     }
 }
 
 @media (max-width: 480px) {
+    body {
+        padding-bottom: 30px; /* Extra bottom padding for small screens */
+    }
+    
+    .game-container {
+        padding: 10px;
+        gap: 10px;
+    }
+    
     .game-title {
         font-size: 1.5rem;
         letter-spacing: 1px;
@@ -471,6 +516,26 @@ body::before {
     .paw-display {
         width: 100px;
         height: 120px;
+    }
+    
+    .chat-container {
+        max-height: 40vh; /* Less space for chat on very small screens */
+    }
+    
+    .wish-input-container {
+        padding: 12px;
+        margin-bottom: 30px;
+    }
+    
+    #makeWishButton, #newPawButton {
+        padding: 16px 20px;
+        font-size: 15px;
+        min-height: 50px;
+    }
+    
+    #wishInput {
+        padding: 16px 18px;
+        min-height: 50px;
     }
     
     .game-over-message h2 {

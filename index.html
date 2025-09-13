@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MonkeyPaw - The Wishing Game</title>
     <meta name="description" content="Try to beat the legendary Monkey's Paw! Make three wishes and watch them backfire in the most twisted ways imaginable.">
-    <link rel="stylesheet" href="css/styles.css?v=2">
+    <link rel="stylesheet" href="css/styles.css?v=3">
 </head>
 <body>
     <div class="game-container">
@@ -320,6 +320,18 @@
             }
         }
 
+        // Mobile viewport height fix
+        function setViewportHeight() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        
+        setViewportHeight();
+        window.addEventListener('resize', setViewportHeight);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(setViewportHeight, 100);
+        });
+        
         document.addEventListener('DOMContentLoaded', () => {
             window.monkeyPawGame = new MonkeyPawGame();
         });
