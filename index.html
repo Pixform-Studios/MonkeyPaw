@@ -59,21 +59,21 @@
                 this.init();
             }
 
-            async init() {
+            init() {
                 console.log('MonkeyPaw game initialized (Production)');
-                await this.loadMonkeyPawSVG();
+                this.loadMonkeyPawEmoji();
                 this.setupEventListeners();
                 this.updateWishCounter();
             }
 
-            async loadMonkeyPawSVG() {
-                try {
-                    const response = await fetch('images/monkey-paw.svg');
-                    const svgContent = await response.text();
-                    this.pawDisplay.innerHTML = svgContent;
-                } catch (error) {
-                    this.pawDisplay.innerHTML = `<div style="font-size: 4rem; text-align: center;"><div id="paw-emoji">🖐️</div></div>`;
-                }
+            loadMonkeyPawEmoji() {
+                // Simple emoji display - start with 3 fingers
+                this.pawDisplay.innerHTML = `
+                    <div style="font-size: 4rem; text-align: center;">
+                        <div id="paw-emoji">👌</div>
+                    </div>
+                `;
+                console.log('MonkeyPaw emoji loaded successfully');
             }
 
             setupEventListeners() {
@@ -105,7 +105,7 @@
                 const typingId = this.showTypingIndicator();
 
                 try {
-                    const response = await this.callAPI(wishData);
+                    const response = await this.callGeminiAPI(wishData);
                     this.removeTypingIndicator(typingId);
                     
                     wishData.response = response;
@@ -113,28 +113,18 @@
                     this.addMessage(response, 'genie-message');
                     this.handleWishProcessed(wishData);
                 } catch (error) {
-                    console.error('Error:', error);
+                    console.error('API Error:', error);
                     this.removeTypingIndicator(typingId);
-                    const fallbackResponse = this.getFallbackResponse(wishText);
-                    
-                    wishData.response = fallbackResponse;
-                    
-                    this.addMessage(fallbackResponse, 'genie-message');
-                    this.handleWishProcessed(wishData);
+                    this.addMessage('The Monkey\'s Paw is unavailable. Please try again when connected to the server.', 'genie-message');
+                    this.setWishInputState(false); // Re-enable input without processing wish
                 }
             }
 
-            async callAPI(wishData) {
-                // Build conversation context from previous wishes
-                let conversationContext = '';
-                if (this.gameState.wishes.length > 1) {
-                    conversationContext = '\n\nPREVIOUS WISHES AND CONSEQUENCES:\n';
-                    for (let i = 0; i < this.gameState.wishes.length - 1; i++) {
-                        const prevWish = this.gameState.wishes[i];
-                        conversationContext += `Wish ${i + 1}: "${prevWish.text}" - ${prevWish.response || '[Response pending]'}\n`;
-                    }
-                    conversationContext += '\nUSE THESE PREVIOUS CONSEQUENCES TO MAKE THE CURRENT WISH EVEN WORSE. Build on the suffering.';
-                }
+            async callGeminiAPI(wishData) {
+                // Build conversation history for context
+                const conversationHistory = this.gameState.wishes.map((wish, index) => {
+                    return `Wish ${index + 1}: "${wish.text}"${wish.response ? ` → ${wish.response}` : ''}`;
+                }).join('\n');
 
                 const response = await fetch('api/gemini-proxy.php', {
                     method: 'POST',
@@ -142,7 +132,7 @@
                     body: JSON.stringify({
                         wish: wishData.text,
                         wishNumber: wishData.wishNumber,
-                        context: conversationContext
+                        conversationHistory: conversationHistory
                     })
                 });
 
@@ -158,28 +148,6 @@
                 return data.response;
             }
 
-            getFallbackResponse(wishText) {
-                const lowerWish = wishText.toLowerCase();
-                
-                if (lowerWish.includes('rich') || lowerWish.includes('money') || lowerWish.includes('wealth')) {
-                    return `Granted—you become incredibly wealthy, but every dollar you touch turns to ash after exactly 10 seconds. You can see your fortune, but never spend a penny.`;
-                }
-                
-                if (lowerWish.includes('car') || lowerWish.includes('vehicle')) {
-                    return `Done—you receive the exact car you wanted, but it only starts when you're crying tears of genuine despair, and stops the moment you feel even slightly happy.`;
-                }
-                
-                if (lowerWish.includes('fly') || lowerWish.includes('flight')) {
-                    return `Granted—you can now fly, but only when you're on fire. The flames never go out, and the higher you fly, the more agonizing the burns become.`;
-                }
-                
-                const responses = [
-                    `Granted—you get exactly what you asked for, but it's fused permanently to your flesh and slowly poisoning you from within.`,
-                    `Done—your wish comes true, but only when you're experiencing the worst pain imaginable, and stops the moment you feel relief.`,
-                    `Granted—you receive your wish, but everyone you've ever loved will suffer eternally because of your greed.`
-                ];
-                return responses[Math.floor(Math.random() * responses.length)];
-            }
 
             handleWishProcessed(wishData) {
                 this.gameState.wishesUsed++;
@@ -194,23 +162,17 @@
             }
 
             closeFinger(wishNumber) {
-                const fingerMapping = { 1: 'finger-1', 2: 'finger-2', 3: 'finger-3' };
-                const fingerElement = document.getElementById(fingerMapping[wishNumber]);
-                const closedFingerElement = document.getElementById(fingerMapping[wishNumber] + '-closed');
-
-                if (fingerElement && closedFingerElement) {
-                    fingerElement.classList.add('finger-closing');
+                // 3 wishes: 👌(start) → ✌️(after 1st) → ☝️(after 2nd) → ✊(after 3rd)
+                const pawEmoji = document.getElementById('paw-emoji');
+                if (pawEmoji) {
+                    const emojiStates = ['👌', '✌️', '☝️', '✊']; // 0=start, 1=after1st, 2=after2nd, 3=after3rd
+                    pawEmoji.textContent = emojiStates[wishNumber] || '✊';
+                    
+                    // Add simple animation effect
+                    pawEmoji.style.transform = 'scale(0.9)';
                     setTimeout(() => {
-                        fingerElement.style.display = 'none';
-                        closedFingerElement.style.display = 'block';
-                        closedFingerElement.classList.add('finger-closed');
-                    }, 400);
-                } else {
-                    const pawEmoji = document.getElementById('paw-emoji');
-                    if (pawEmoji) {
-                        const emojiStates = ['🖐️', '🤘', '✌️', '✊'];
-                        pawEmoji.textContent = emojiStates[wishNumber] || '✊';
-                    }
+                        pawEmoji.style.transform = 'scale(1)';
+                    }, 300);
                 }
             }
 
@@ -254,7 +216,8 @@
                 messageContent.className = 'message-content';
                 messageContent.innerHTML = `<em>Granting wish</em><span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>`;
                 typingDiv.appendChild(messageContent);
-                this.chatMessages.appendChild(messageDiv);
+                this.chatMessages.appendChild(typingDiv);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
                 this.addTypingAnimationCSS();
                 return typingDiv.id;
             }
@@ -278,6 +241,12 @@
 
             endGame() {
                 this.gameState.gameOver = true;
+                
+                // Make sure final fist emoji is shown
+                const pawEmoji = document.getElementById('paw-emoji');
+                if (pawEmoji) {
+                    pawEmoji.textContent = '✊';
+                }
                 
                 const titleElement = document.querySelector('.game-title');
                 if (titleElement) {
@@ -338,7 +307,7 @@
                     </div>
                 `;
                 
-                this.loadMonkeyPawSVG();
+                this.loadMonkeyPawEmoji();
                 
                 const wishesCounterElement = document.querySelector('.wishes-counter');
                 if (wishesCounterElement) {

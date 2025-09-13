@@ -40,10 +40,16 @@ php -S localhost:8000
 # Visit http://localhost:8000
 ```
 
-### For Production (Hostinger/cPanel)
-1. Upload all files to your web hosting public_html folder
-2. Ensure PHP is enabled on your hosting
-3. The game will work automatically with the included PHP backend
+### For WordPress/Shared Hosting Deployment
+1. **Create a folder** in your public_html: `/public_html/monkeypaw/`
+2. **Upload all files** maintaining the exact structure:
+   - `index.html` 
+   - `css/styles.css`
+   - `images/monkey-paw.svg`
+   - `api/gemini-proxy.php` (contains your API key - keep secure!)
+3. **Set permissions**: Folders `755`, Files `644`
+4. **Access your game**: `https://yoursite.com/monkeypaw/`
+5. **Works immediately** - no additional setup needed!
 
 ## 📁 Project Structure
 

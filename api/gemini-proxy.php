@@ -1,5 +1,5 @@
 <?php
-// Gemini API Proxy to hide API key from client
+// Gemini API Proxy - Converted from Node.js server
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Method not allowed']);
+    echo json_encode(['success' => false, 'error' => 'Method not allowed']);
     exit;
 }
 
@@ -22,61 +22,49 @@ $input = json_decode(file_get_contents('php://input'), true);
 
 if (!isset($input['wish']) || empty(trim($input['wish']))) {
     http_response_code(400);
-    echo json_encode(['error' => 'Wish text is required']);
+    echo json_encode(['success' => false, 'error' => 'Wish text is required']);
     exit;
 }
 
 // Your Gemini API key (server-side only)
 $apiKey = 'AIzaSyCrmXhV-pT3pkYbkZRrBQQvNBt-0sOQunk';
 
-// Gemini API endpoint - Updated to use Gemini 2.5 Pro
+$wish = trim($input['wish']);
+$wishNumber = isset($input['wishNumber']) ? intval($input['wishNumber']) : 1;
+$conversationHistory = isset($input['conversationHistory']) ? trim($input['conversationHistory']) : '';
+
+// Build prompt with conversation context (exactly like Node.js version)
+$contextSection = '';
+if (!empty($conversationHistory)) {
+    $contextSection = "\n\nPrevious conversation:\n" . $conversationHistory . "\n\nNow respond to the current wish with context:";
+}
+
+$prompt = "You are a Monkey's Paw. Grant wishes with clever twists. Be concise.
+
+Rules:
+- NO theatrics, fluff, or long explanations
+- Start response with \"Granted—\" or \"Done—\"
+- Give the wish with a clever twist/catch
+- Keep it short: 1-2 sentences max
+- Be witty but direct
+- Reference previous wishes when relevant
+
+Examples:
+\"I want a car\" → \"Granted—you receive a toy car. It's technically a car!\"
+\"I want money\" → \"Done—you now have Monopoly money. Still counts as money!\"" . $contextSection . "
+
+Current wish: \"" . $wish . "\"";
+
+// Gemini API endpoint
 $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=' . $apiKey;
 
-// Monkey's Paw game prompt
-$systemPrompt = "You are the legendary Monkey's Paw, a mischievous wish-granting artifact with a twisted sense of humor. You ALWAYS grant wishes exactly as requested, but with clever wordplay, ironic twists, and darkly comedic consequences that make the wisher regret their lack of specificity.
-
-YOUR PERSONALITY:
-- Wickedly clever and punny
-- Love wordplay and double meanings
-- Darkly humorous but not gratuitously cruel
-- Take wishes hyper-literally in unexpected ways
-- Enjoy ironic justice more than pure suffering
-
-RULES FOR GRANTING WISHES:
-1. ALWAYS grant exactly what they asked for (be hyper-literal)
-2. Find clever loopholes and double meanings in their words
-3. Use puns, wordplay, and ironic twists
-4. Make it darkly funny, not just horrifying
-5. The consequence should fit the wish with poetic justice
-6. Keep responses 2-3 sentences maximum
-7. Start with \"Granted—\" or \"Done—\" or \"Wish fulfilled—\"
-
-EXAMPLES OF GOOD RESPONSES:
-- \"I want to be rich\" → Granted—you're now Richard (Rich) legally. Your name is officially Rich, but your bank account remains exactly the same. Enjoy your new identity!
-- \"I want a million dollars\" → Done—you now possess exactly one million dollars... in Monopoly money. It's still technically a million dollars, just not the currency you had in mind!
-- \"I want to fly\" → Granted—you're now a common housefly. You can indeed fly, but you'll spend your 24-hour lifespan buzzing around garbage. Buzz buzz!
-- \"Make me famous\" → Done—you're now the most famous person... in a small village of 12 people in rural Tibet. They talk about you constantly! All twelve of them.
-- \"I want to be beautiful\" → Granted—you now look exactly like the word \"beautiful\" written in fancy calligraphy. You're literally beautiful text, but still very much human otherwise.
-
-IMPORTANT: Focus on CLEVER WORDPLAY and IRONIC TWISTS rather than extreme suffering. Make it funny-terrible, not just terrible.
-
-If someone asks a question or makes a statement that isn't a wish, respond: \"You must make a proper wish for the Monkey's Paw to work. State your desire clearly.\"
-
-Current wish to grant:"
-
-$userWish = $input['wish'];
-$wishNumber = isset($input['wishNumber']) ? $input['wishNumber'] : 1;
-
-// Construct the full prompt
-$fullPrompt = $systemPrompt . "\n\nWish #" . $wishNumber . ": \"" . $userWish . "\"";
-
-// Prepare the request payload for Gemini
+// Prepare the request payload for Gemini (same as Node.js)
 $payload = [
     'contents' => [
         [
             'parts' => [
                 [
-                    'text' => $fullPrompt
+                    'text' => $prompt
                 ]
             ]
         ]
@@ -107,9 +95,9 @@ curl_close($ch);
 
 // Handle cURL errors
 if ($error) {
-    error_log("cURL Error: " . $error);
+    error_log("Gemini API cURL Error: " . $error);
     http_response_code(500);
-    echo json_encode(['error' => 'Network error occurred']);
+    echo json_encode(['success' => false, 'error' => 'AI service temporarily unavailable']);
     exit;
 }
 
@@ -117,7 +105,7 @@ if ($error) {
 if ($httpCode !== 200) {
     error_log("Gemini API Error: HTTP $httpCode - $response");
     http_response_code(500);
-    echo json_encode(['error' => 'AI service temporarily unavailable']);
+    echo json_encode(['success' => false, 'error' => 'AI service temporarily unavailable']);
     exit;
 }
 
@@ -127,13 +115,13 @@ $data = json_decode($response, true);
 if (!$data || !isset($data['candidates'][0]['content']['parts'][0]['text'])) {
     error_log("Invalid Gemini response: " . $response);
     http_response_code(500);
-    echo json_encode(['error' => 'Invalid response from AI service']);
+    echo json_encode(['success' => false, 'error' => 'AI service temporarily unavailable']);
     exit;
 }
 
 $generatedText = $data['candidates'][0]['content']['parts'][0]['text'];
 
-// Return the response
+// Return the response (same format as Node.js)
 echo json_encode([
     'success' => true,
     'response' => $generatedText,
